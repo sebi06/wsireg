@@ -1,0 +1,11 @@
+/data
+/wsireg/utils/__pycache__
+/wsireg/__pycache__
+
+# Ignore Python cache directories
+__pycache__/
+
+# You can also add other patterns to ignore additional files or directories
+*.pyc
+*.pyo
+*.pyd
