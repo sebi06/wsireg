@@ -18,3 +18,5 @@ tiler
 tqdm
 matplotlib
 czitools
+
+# conda create --name wsireg python=3.11
