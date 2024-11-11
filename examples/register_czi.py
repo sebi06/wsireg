@@ -5,13 +5,22 @@ from czitools.metadata_tools.scaling import CziScaling
 from czitools.metadata_tools.channel import CziChannelInfo
 
 
-fixed_image_path = r"F:\Testdata_Zeiss\Pfizer\Pfizer_Multiplex\single_scenes\2019_01_15__0014_S1.czi"
-moving_image_path = r"F:\Testdata_Zeiss\Pfizer\Pfizer_Multiplex\single_scenes\2019_01_17__0033_S1.czi"
+# fixed_image_path = r"F:\Testdata_Zeiss\Pfizer\Pfizer_Multiplex\single_scenes\2019_01_15__0014_S1.czi"
+# moving_image_path = r"F:\Testdata_Zeiss\Pfizer\Pfizer_Multiplex\single_scenes\2019_01_17__0033_S1.czi"
 
 # fixed_image_path = r"F:\Github\wsireg\data\round1_S=1_CH=1_sm.czi"
 # moving_image_path = r"F:\Github\wsireg\data\round2_S=1_CH=1_sm.czi"
 
+fixed_image_path = (
+    r"F:\Testdata_Zeiss\Co-Registration\valisdocker\spot_round1.czi"
+)
+moving_image_path = (
+    r"F:\Testdata_Zeiss\Co-Registration\valisdocker\spot_round2.czi"
+)
+
 result_path = Path(fixed_image_path).parent / "output"
+
+modalities = ["R1", "R2"]
 
 # Check if the folder exists
 if Path(result_path).exists() and Path(result_path).is_dir():
@@ -30,8 +39,6 @@ czi_ch2 = CziChannelInfo(moving_image_path)
 
 # Adding the suffix "_reg" to each item in the list
 czi_ch2.names = [s + '_reg' for s in czi_ch2.names]
-
-result_path = r"./data/output"
 
 # Check if the file exists
 if Path(fixed_image_path).exists():
@@ -61,11 +68,11 @@ reg_graph = WsiReg2D("my_reg_project", str(result_path))
 
 # add registration images (modalities)
 reg_graph.add_modality(
-    "round1",
+    modalities[0],
     fixed_image_path,
     image_res=czi_scale1.X,
     channel_names=czi_ch1.names,
-    # channel_colors=["blue"],
+    # channel_colors=["blue"],  # please check the number of channels !!!
     preprocessing={
         "image_type": "FL",
         "ch_indices": [reference_channel_index],
@@ -75,7 +82,7 @@ reg_graph.add_modality(
 )
 
 reg_graph.add_modality(
-    "round2",
+    modalities[1],
     moving_image_path,
     image_res=czi_scale2.X,
     channel_names=czi_ch2.names,
@@ -89,14 +96,14 @@ reg_graph.add_modality(
 # specify merge_modalities
 reg_graph.add_merge_modalities(
     "merged",
-    ["round1", "round2"],
+    modalities,
 )
 
 # we register here the fluorescence modalities
 # using a rigid and affine parameter map
 reg_graph.add_reg_path(
-    "round2",
-    "round1",
+    modalities[1],
+    modalities[0],
     thru_modality=None,
     # reg_params=["rigid", "affine"],
     reg_params=["affine"],
