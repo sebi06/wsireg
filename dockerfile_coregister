@@ -1,0 +1,37 @@
+FROM continuumio/miniconda3 AS base
+
+#WORKDIR /usr/src/app
+
+COPY ./coregister_docker_env.yml ./coregister_docker_env.yml
+
+RUN conda env create -f ./coregister_docker_env.yml
+
+RUN echo "source activate coregister" >> ~/.bashrc
+ENV CONDA_DEFAULT_ENV=coregister
+ENV PATH=./opt/conda/envs/coregister/bin:$PATH
+
+FROM base AS primary
+
+# mount volumes
+VOLUME [ "/input", "/output" ]
+
+COPY coregister_main.py .
+COPY coregistration.py .
+
+# code to run when container is started:
+ENTRYPOINT ["conda", "run", "--no-capture-output", "-n", "coregister", "python", "coregister_main.py"]
+
+
+## Build the container
+
+# docker build -f dockerfile_coregister -t m1srh/coregister:latest .
+
+# Run the container using the input specified inside the wfe.env file
+
+# WFE_INPUT_JSON={"input_image1":"/input/round1_S=1_CH=1_sm.czi", "input_image2":"/input/round2_S=1_CH=1_sm.czi", "reference_channel_index":0,"WFE_output_params_file":"/output.json"}
+
+# docker run -it --rm -v ${PWD}/input:/input -v ${PWD}/output:/output --env-file wfe.env m1srh/coregister:latest
+
+# or in case of using the GPU
+
+# docker run -it --gpus=all --rm -v ${PWD}/input:/input -v ${PWD}/output:/output --env-file wfe.env m1srh/coregister:latest
